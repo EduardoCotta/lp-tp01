@@ -27,5 +27,7 @@ fun eof () = Tokens.EOF(0,0)
 fun init() = ()
 %%
 %header (functor PlcLexerFun(structure Tokens: PlcParser_TOKENS));
-
+digit=[0-9];
 %%
+\n => (lineNumber := !lineNumber +1; lex());
+{digit}+ => (NUM(valOf(Int.fromString yytext), !lineNumber, !lineNumber));
