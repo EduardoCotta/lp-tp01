@@ -1,5 +1,3 @@
-use "Absyn.sml";
-
 %%
 
 %name PlcParser
