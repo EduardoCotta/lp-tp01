@@ -1,4 +1,3 @@
-use "Absyn.sml";
 
 val cases =
   (
@@ -287,8 +286,9 @@ val cases =
     in
         (s, e)
     end
-  ) ::
-  (
+  ) :: [];
+  (*
+   (
     let val s = "fn (Int x) => x end";
         val e = Anon (IntT, "x", Var "x")
     in
@@ -438,4 +438,4 @@ val cases =
     in
         (s, e)
     end
-  ) ];
+  ) ]; *)
