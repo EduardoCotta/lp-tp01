@@ -59,3 +59,4 @@ fun val2string v =
     | ListV vs => "(" ^ list2string (val2string, vs) ^ ")"
     | SeqV vs => "[" ^ list2string (val2string, vs) ^ "]"
     | Clos _ => "<fun>";
+  

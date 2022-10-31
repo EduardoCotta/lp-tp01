@@ -1,12 +1,18 @@
 (* Plc Parser Aux *)
 
+(* 
+
+t = ListT [t1; t2] e 
+e1 = Let(x1, Item(1, x), Let(x2, Item(2, x), e1))
+
+*)
 (* Creat the body of a function expression. *)
 fun makeFunAux (n: int, xs: (plcType * string) list, e: expr): expr =
-    e (* TODO *)
-
+    case xs of 
+      [] => e |
+      (t,s)::tl => Let(s, Item(n, Var "$list"), makeFunAux(n+1, tl, e))
 (* Create the list of arguments of a function. *)
-fun makeType (args: (plcType * string) list): plcType =
-    ListT [] (* TODO *)
+fun makeType (args: (plcType * string) list): plcType = ListT (List.map (fn (x,y) => x) args);
 
 (* Create a function expression. *)
 fun makeFun (f: string, xs: (plcType * string) list, rt: plcType, e1: expr, e2: expr): expr =

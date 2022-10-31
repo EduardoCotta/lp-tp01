@@ -29,9 +29,9 @@ fromString "print x; true";
 fromString "3::7::t";
 fromString "var x = 9; x + 3";
 fromString "match x with | 0 -> 1| _ -> -1 end";
-(*fromString "fn (Int x) => -x end";
+fromString "fn (Int x) => -x end";
 fromString "fun f(Int x) = x; f(1)";
-fromFile ("example.plc"); *)
+fromFile ("example.plc");
 
 use "testParserCases.sml";
 

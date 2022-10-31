@@ -39,6 +39,9 @@ fun getKeywordOrName (s, lpos, rpos) =
     "with" => WITH(lpos, rpos) |
     "end" => END(lpos, rpos) |
     "then" => THEN(lpos, rpos) |
+    "fun" => FUN(lpos, rpos) |
+    "rec" => REC(lpos, rpos) |
+    "fn" => FN(lpos, rpos) |
     "_" => UNDERSCORE(lpos, rpos) |
     _ => NAME(s, lpos, rpos)
 
@@ -79,3 +82,5 @@ keyword=[a-zA-Z_][a-zA-Z_0-9]*;
 "!" => (NEGATION(yypos, yypos));
 "{" => (LKEY(yypos, yypos));
 "}" => (RKEY(yypos, yypos));
+":" => (COLON(yypos, yypos));
+"=>" => (FUNARROW(yypos, yypos));

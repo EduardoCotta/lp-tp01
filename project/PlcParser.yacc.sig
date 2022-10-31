@@ -3,6 +3,11 @@ sig
 type ('a,'b) token
 type svalue
 val EOF:  'a * 'a -> (svalue,'a) token
+val FUNARROW:  'a * 'a -> (svalue,'a) token
+val FN:  'a * 'a -> (svalue,'a) token
+val COLON:  'a * 'a -> (svalue,'a) token
+val REC:  'a * 'a -> (svalue,'a) token
+val FUN:  'a * 'a -> (svalue,'a) token
 val NEGATION:  'a * 'a -> (svalue,'a) token
 val RKEY:  'a * 'a -> (svalue,'a) token
 val LKEY:  'a * 'a -> (svalue,'a) token

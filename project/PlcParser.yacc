@@ -16,20 +16,25 @@
       NOT | HD | TL | ISE | UNDERSCORE |
       PRINT | NAME of string | VAR |
       PIPE | MATCH | WITH | END | THEN |
-      LKEY | RKEY | NEGATION |
+      LKEY | RKEY | NEGATION | FUN | REC |
+      COLON | FN | FUNARROW |
       EOF
 
 %nonterm Prog of expr |
          Decl of expr |
          Expr of expr |
-         AtmExp of expr |
+         AtmExpr of expr |
+         AppExpr of expr |
          Const of expr  |
          Comps of expr list |
          Type of plcType |
          AtmType of plcType | 
          MatchExpr of (expr option * expr) list | 
          CondExpr of (expr option) |
-         Types of plcType list
+         Types of plcType list | 
+         Args of (plcType * string) list | 
+         Params of (plcType * string) list | 
+         TypedVar of (plcType * string)
 
 %right SEMICOLON ARROW
 %nonassoc IF
@@ -54,9 +59,13 @@
 Prog: Expr (Expr) |
        Decl (Decl)
 
-Decl: VAR NAME EQ Expr SEMICOLON Prog (Let(NAME, Expr, Prog))
+Decl: VAR NAME EQ Expr SEMICOLON Prog (Let(NAME, Expr, Prog)) | 
+      FUN NAME Args EQ Expr SEMICOLON Prog (Let(NAME, makeAnon(Args, Expr), Prog)) | 
+      FUN REC NAME Args COLON Type EQ Expr SEMICOLON Prog (makeFun(NAME, Args, Type, Expr, Prog))
 
-Expr: AtmExp (AtmExp) |
+
+Expr: AtmExpr (AtmExpr) |
+      AppExpr (AppExpr) |
       MATCH Expr WITH MatchExpr (Match(Expr, MatchExpr)) |
       IF Expr THEN Expr ELSE Expr (If(Expr1, Expr2, Expr3)) |
       Expr LSBRACK NUM RSBRACK (Item(NUM, Expr)) |
@@ -78,11 +87,15 @@ Expr: AtmExp (AtmExp) |
       Expr LTE Expr (Prim2("<=", Expr1 , Expr2)) | 
       MINUS Expr (Prim1("-", Expr))
 
-AtmExp: Const (Const) |
+AtmExpr: Const (Const) |
         LPAR Comps RPAR (List(Comps)) |
         NAME (Var(NAME)) |
         LKEY Prog RKEY (Prog) |
-        LPAR Expr RPAR (Expr)
+        LPAR Expr RPAR (Expr) | 
+        FN Args FUNARROW Expr END (makeAnon(Args, Expr))
+
+AppExpr: AtmExpr AtmExpr (Call(AtmExpr1, AtmExpr2)) |
+         AppExpr AtmExpr (Call(AppExpr, AtmExpr))
 
 Const: NUM (ConI(NUM)) |
       TRUE (ConB(true)) |
@@ -111,3 +124,11 @@ MatchExpr: END ([]) |
 
 CondExpr: Expr (SOME Expr) | 
           UNDERSCORE (NONE)
+
+Args: LPAR RPAR ([]) | 
+      LPAR Params RPAR (Params)
+
+Params: TypedVar (TypedVar::[]) | 
+        TypedVar COMMA Params (TypedVar::Params)
+
+TypedVar: Type NAME (Type, NAME)

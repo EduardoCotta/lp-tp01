@@ -286,8 +286,7 @@ val cases =
     in
         (s, e)
     end
-  ) :: [];
-  (*
+  ) ::
    (
     let val s = "fn (Int x) => x end";
         val e = Anon (IntT, "x", Var "x")
@@ -438,4 +437,8 @@ val cases =
     in
         (s, e)
     end
-  ) ]; *)
+  ) ];
+
+fun testCase (sourceCode, expected) = ((fromString sourceCode) = expected)
+val results = map (fn (s,e) => testCase(s, e)) cases;
+val result = foldl (fn (a, b) => a andalso b) true results;
