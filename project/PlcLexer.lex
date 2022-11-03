@@ -84,3 +84,5 @@ keyword=[a-zA-Z_][a-zA-Z_0-9]*;
 "}" => (RKEY(yypos, yypos));
 ":" => (COLON(yypos, yypos));
 "=>" => (FUNARROW(yypos, yypos));
+. => (error("\n--- Tokenization failed at PlcLexer: bad character found ---\n"); 
+      raise Fail("Bad character: "^yytext));
