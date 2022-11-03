@@ -297,7 +297,8 @@ let fun continue() = lex() in
 | 59 => (RKEY(yypos, yypos))
 | 61 => (COLON(yypos, yypos))
 | 64 => (FUNARROW(yypos, yypos))
-| 66 => let val yytext=yymktext() in error("\n---Lexer failed: bad character found ---\n"); raise Fail("Bad character: "^yytext) end
+| 66 => let val yytext=yymktext() in error("\n--- Tokenization failed at PlcLexer: bad character found ---\n"); 
+      raise Fail("Bad character: "^yytext) end
 | 7 => (lex())
 | _ => raise Internal.LexerError
 
