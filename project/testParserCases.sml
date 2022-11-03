@@ -438,7 +438,3 @@ val cases =
         (s, e)
     end
   ) ];
-
-fun testCase (sourceCode, expected) = ((fromString sourceCode) = expected)
-val results = map (fn (s,e) => testCase(s, e)) cases;
-val result = foldl (fn (a, b) => a andalso b) true results;
