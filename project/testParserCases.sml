@@ -438,3 +438,7 @@ val cases =
         (s, e)
     end
   ) ];
+
+fun checkCase (code, expectedCode) = ((fromString code) = expectedCode)
+val testsResult = map (fn (s,e) => checkCase(s, e)) cases;
+val result = foldr (fn (a, b) => a andalso b) true testsResult;
