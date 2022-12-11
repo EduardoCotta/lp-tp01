@@ -22,11 +22,15 @@ fun hasEqualImplemented t =
         (SeqT x) => hasEqualImplemented x |
         _ => false
 
+fun indexInbouds i list = (i > 0 andalso i <= List.length(list))
+
 fun teval (e:expr) (env: plcType env) : plcType =
 	case e of
 		  ConI _ => IntT
+		| ConB _ => BoolT
 		| Var x => lookup env x
 		| ESeq(SeqT(t)) => SeqT t
+		| Anon(t, x, e1) => FunT(t, teval e1 ((x, t)::env))
 		| Prim1(opr, e1) =>
 				let
 					val t1 = teval e1 env
@@ -72,4 +76,67 @@ fun teval (e:expr) (env: plcType env) : plcType =
 				in
 					teval e2 env'
 				end
+		| Letrec(fName, argType, argName, returnType, e1, e2) => 
+			(let
+				val t1 = teval e1 ((fName, FunT(argType, returnType ))::(argName, argType)::env);
+				val t2 = teval e2 ((fName, FunT(argType, returnType ))::env);
+			 in (
+				if t1 = returnType then t2 else raise WrongRetType
+			 )
+			 end
+			)
+		| Match(_, []) => raise NoMatchResults
+		| If(e1, e2, e3) => 
+			if (teval e1 env = BoolT) then 
+				(let
+					val t2 = teval e2 env;
+					val t3 = teval e3 env;
+				in (
+					if t2 = t3 then t2 else raise DiffBrTypes
+				)
+				end
+				)
+			else
+				raise IfCondNotBool
+		| Item(i,  e1) => 
+            (let
+                val t1 = teval e1 env;
+            in
+                case t1 of 
+                    ListT list => if indexInbouds i list 
+								  then List.nth(list, i - 1) 
+								  else raise ListOutOfRange
+                    | _ => raise OpNonList
+            end)
+		| Call(e1, e2) => 
+			(let 
+				val t1 = teval e1 env;
+				val t2 = teval e2 env;
+			 in
+			 (
+				case t1 of
+					(FunT(argType, returnType)) => 
+						if t2 = argType 
+						then returnType 
+						else raise CallTypeMisM
+					| _ => raise NotFunc
+			 )
+			 end)
+		| List([]) => ListT([])
+		| List(x::xs) => (
+			let 
+				val tHead = teval x env;
+				val tailListTypes = (let 
+										val tTail = teval List(xs) env;
+									in (
+										case tTail of
+											ListT t => t
+											| _ => raise OpNonList
+									)
+									end)
+			in (
+				ListT(tHead::tailListTypes)
+			)
+			end
+		)
 		| _   =>  raise UnknownType
