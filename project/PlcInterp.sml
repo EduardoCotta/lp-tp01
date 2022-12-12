@@ -6,16 +6,6 @@ exception TLEmptySeq
 exception ValueNotFoundInMatch
 exception NotAFunc
 
-fun destructBoolV(v: plcVal) : bool =
-    case v of 
-        BoolV i => i
-        | _ => raise Impossible
-
-fun destructIntV(v: plcVal) : int =
-    case v of 
-        IntV i => i
-        | _ => raise Impossible
-
 fun eval (e:expr) (env:plcVal env) : plcVal =
 	case e of
 		  ConI i => IntV i
@@ -35,7 +25,7 @@ fun eval (e:expr) (env:plcVal env) : plcVal =
 			ListV(e1::e2)
 		end
 		| Item(e1, e2) => let
-				val i = eval e2 evan;
+				val i = eval e2 env;
 				val newList = let
 					val v = i;
 				in
@@ -50,7 +40,7 @@ fun eval (e:expr) (env:plcVal env) : plcVal =
 		| ESeq _ => SeqV []
 		| Var x => lookup env x
 		| If(e1, e2, e3) => 
-			if eval e1 env = BoolV true then eval e2 env else eval e3 env
+			if eval e1 env = (BoolV true) then eval e2 env else eval e3 env
 		| Anon (e1, e2, e3) => Clos("", e2, e3, env)
 		| Prim1(opr, e1) =>
 				let
@@ -64,33 +54,21 @@ fun eval (e:expr) (env:plcVal env) : plcVal =
 										in
 											print(s^"\n"); ListV []
 										end
-						| ("!", ConB i) => BoolV(not i)
-						| ("!", i) => BoolV(not(destructBoolV(eval i env)))
-						| ("hd", i) => let
-							val valE = eval i env
-						in
-							case valE of
+						| ("!", BoolV i) => BoolV(not i)
+						| ("hd", l1) => 
+							(case l1 of
 								SeqV(x::xs: plcVal list) => x
 								| SeqV [] => raise HDEmptySeq
-								| _ => raise Impossible
-						end
-						| ("tl", i) => let
-							val valE = eval i env
-						in
-							case valE of
+								| _ => raise Impossible)
+						| ("tl", l1) => 
+							(case l1 of
 								SeqV(x::xs: plcVal list) => SeqV(xs)
 								| SeqV [] => raise TLEmptySeq
-								| _ => raise Impossible
-						end
-						| ("-", ConI i) => IntV(~i)
-						| ("-", i) => IntV(~destructIntV(eval i env))
-						| ("ise", i) => let
-							val valE = eval i env
-						in
-							case valE of
+								| _ => raise Impossible)
+						| ("ise", l1) => 
+							(case l1 of
 								SeqV [] => BoolV true
-								| _ => BoolV false
-						end
+								| _ => BoolV false)
 
 						| _   => raise Impossible
 						end
@@ -128,23 +106,24 @@ fun eval (e:expr) (env:plcVal env) : plcVal =
 			val funVar = lookup env v
 		in
 			case funVar of
-				Clos(funVar, x, e1, funState) => let
+				Clos(v, x, e1, funState) => let
 					val valE = eval e env;
-					val newEnv = (x, valE)::(v, funVar)::funState
+					val newEnv = ((x, valE)::(v, funVar)::funState);
 				in
 					eval e1 newEnv
 				end
 				| _ => raise NotAFunc
-		| Call(Call f, e) => let
+		end
+		| Call(Call f, e) => (let
 			val funVar = eval (Call f) env;
 		in
 			case funVar of
 				Clos(f, x, e1, funState) => let
 					val valE = eval e env;
-					val newEnv = (x, valE)::(v, funVar)::funState
+					val newEnv = (x, valE)::(f, funVar)::funState;
 				in
 					eval e1 newEnv
 				end
 				| _ => raise NotAFunc
+		end)
 		| _ => raise Impossible
-

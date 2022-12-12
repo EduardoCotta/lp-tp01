@@ -39,15 +39,15 @@ fun teval (e:expr) (env: plcType env) : plcType =
 						 ("print", _) => ListT [] 
                          | ("!", t1) => if t1 = BoolT then BoolT else raise UnknownType 
                          | ("hd", t1) => (case t1 of 
-                                         (SeqT, seqType) => seqType |
+                                         (SeqT seqType) => seqType |
                                          _ => raise OpNonList) 
                          | ("tl", t1) => (case t1 of 
-                                         (SeqT, seqType) => t1 |
+                                         (SeqT seqType) => t1 |
                                          _ => raise OpNonList) 
                          | ("-", t1) => if t1 = IntT then IntT else raise UnknownType 
                          | ("ise", t1) => (case t1 of 
-                                          (SeqT, _) => BoolT |
-                                           _ => raise UnknownType) |  
+                                          (SeqT _) => BoolT |
+                                           _ => raise UnknownType)  
 						 | _ => raise UnknownType
 				end
 		| Prim2(opr, e1, e2) =>
@@ -127,7 +127,7 @@ fun teval (e:expr) (env: plcType env) : plcType =
 			let 
 				val tHead = teval x env;
 				val tailListTypes = (let 
-										val tTail = teval List(xs) env;
+										val tTail = teval (List(xs)) env;
 									in (
 										case tTail of
 											ListT t => t
